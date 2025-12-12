@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Protocol: Meal Generator</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>💪 The Protocol Kitchen</h1>
+        <p>Pick a style, and I'll tell you exactly what to make using the allowed ingredients.</p>
+
+        <label for="cuisine">What's the vibe today?</label>
+        <select id="cuisine">
+            <option value="Comfort Food">Comfort/Homey</option>
+            <option value="Asian Stir Fry">Asian Style</option>
+            <option value="Mexican Bowl">Mexican/Spicy</option>
+            <option value="Italian Herb">Italian/Herbs</option>
+            <option value="Simple & Clean">Super Simple</option>
+        </select>
+
+        <button id="generate-btn" py-click="generate_recipe()">✨ Create Meal Plan ✨</button>
+
+        <div id="loading" style="display:none;">Thinking of something delicious...</div>
+
+        <div id="recipe-output" class="recipe-card"></div>
+    </div>
+
+    <py-script src="./main.py"></py-script>
+
+</body>
+</html>
