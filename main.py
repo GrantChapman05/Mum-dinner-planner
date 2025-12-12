@@ -1,4 +1,5 @@
 import json
+import asyncio
 from pyodide.http import pyfetch
 from js import document, console
 
@@ -33,47 +34,49 @@ SEASONINGS (Unlimited):
 NO SUGAR, NO BUTTER, NO CREAM.
 """
 
+# --- CONFIGURATION ---
+# PASTE YOUR NEW PIPEDREAM URL HERE
+BACKEND_URL = "https://eozuh4g8hv307dt.m.pipedream.net" 
+
 async def generate_recipe(*args):
-    # Get the vibe Mum selected
+    # 1. Get the vibe Mum selected
     vibe = document.getElementById("cuisine").value
     
-    # Show loading state
+    # 2. UI: Show loading, hide old result
     document.getElementById("loading").style.display = "block"
     document.getElementById("recipe-output").innerHTML = ""
 
-    # Construct the user prompt
-    prompt = f"Create a {vibe} meal. Output format: Title, Ingredients (with EXACT grams), and Instructions."
-
-    # Prepare the payload for your API (OpenAI or your Proxy)
-    # Note: Replace 'YOUR_BACKEND_URL' with the secure endpoint you create
-    body = json.dumps({
-        "messages": [
-            {"role": "system", "content": DIET_CONTEXT},
-            {"role": "user", "content": prompt}
-        ]
+    # 3. Prepare the simple package (Just the vibe!)
+    # We moved the Diet Rules to the backend to keep them safe.
+    payload = json.dumps({
+        "vibe": vibe
     })
 
     try:
-        # This uses PyScript's fetch to hit your endpoint
+        # 4. Send the signal to Pipedream
         response = await pyfetch(
-            url="YOUR_BACKEND_URL", 
+            url=BACKEND_URL, 
             method="POST", 
             headers={"Content-Type": "application/json"}, 
-            body=body
+            body=payload
         )
         
-        data = await response.json()
-        recipe_text = data['choices'][0]['message']['content']
-        
-        # Format the output for HTML (replace newlines with breaks)
-        formatted_html = recipe_text.replace("\n", "<br>")
-        
-        # Display to Mum
-        document.getElementById("recipe-output").innerHTML = formatted_html
+        # 5. Get the text back
+        if response.ok:
+            recipe_text = await response.json() 
+            # Note: If Pipedream returns raw text, use await response.string() instead
+            
+            # 6. Format and Display
+            # Simple formatter to make it look nice in HTML
+            formatted_html = recipe_text.replace("\n", "<br>")
+            document.getElementById("recipe-output").innerHTML = formatted_html
+        else:
+            console.log(f"Server Error: {response.status}")
+            document.getElementById("recipe-output").innerHTML = "Error connecting to the kitchen!"
 
     except Exception as e:
-        document.getElementById("recipe-output").innerHTML = "Oops! Something went wrong. Try again."
-        console.log(f"Error: {e}")
+        document.getElementById("recipe-output").innerHTML = f"Something went wrong. Tell [Your Name] to fix the code!<br>Error: {e}"
+        console.log(f"Python Error: {e}")
 
     finally:
         document.getElementById("loading").style.display = "none"
